@@ -1,0 +1,5 @@
+*.tmp
+/ssoer
+
+.vscode
+.idea
