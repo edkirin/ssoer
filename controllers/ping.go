@@ -12,7 +12,7 @@ type PingResponse struct {
 	Message string `json:"message"`
 }
 
-// @Title Pingxxx
+// @Title Ping
 // @Description Returns Pong message
 // @Success 200 {object} controllers.PingResponse
 // @router / [get]
