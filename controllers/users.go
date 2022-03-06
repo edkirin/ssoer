@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"ssoer/helpers"
 	"ssoer/models"
 
@@ -13,6 +14,8 @@ import (
 type UsersController struct {
 	beego.Controller
 }
+
+const minPasswordLength = 8
 
 // type UserResponse struct {
 // 	Message string `json:"message"`
@@ -26,16 +29,31 @@ type UsersController struct {
 func (c *UsersController) Post() {
 	var userRequest models.UserCreateRequest
 
-	var err = json.Unmarshal(c.Ctx.Input.RequestBody, &userRequest)
-	if err != nil {
-		helpers.InternalError(c.Controller, err.Error())
+	validateParams := func() {
+		if len(userRequest.Email) == 0 {
+			helpers.BadRequestError(c.Controller, "Invalid email", "ERROR_EMAIL")
+		}
+		if len(userRequest.Password) < minPasswordLength {
+			helpers.BadRequestError(
+				c.Controller,
+				fmt.Sprintf("Password should contain at least %d characters", minPasswordLength),
+				"ERROR_PASSWORD",
+			)
+		}
 	}
+
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &userRequest); err != nil {
+		helpers.InternalError(c.Controller, err.Error(), "INIVALID_DATA")
+	}
+
+	validateParams()
 
 	o := orm.NewOrm()
 
 	var user models.User = models.User{
 		Uuid:       uuid.New().String(),
 		Email:      userRequest.Email,
+		Password:   helpers.HashPassword(userRequest.Password),
 		FirstName:  userRequest.FirstName,
 		LastName:   userRequest.LastName,
 		IsActive:   true,
@@ -43,9 +61,8 @@ func (c *UsersController) Post() {
 		DateJoined: helpers.GetUTCNow(),
 	}
 
-	_, err = o.Insert(&user)
-	if err != nil {
-		helpers.InternalError(c.Controller, err.Error())
+	if _, err := o.Insert(&user); err != nil {
+		helpers.InternalError(c.Controller, err.Error(), "ERROR_INSERT")
 	}
 
 	c.Data["json"] = user
