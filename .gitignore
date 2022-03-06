@@ -1,5 +1,7 @@
 *.tmp
 /ssoer
+/swagger
+/static
 
 .vscode
 .idea
