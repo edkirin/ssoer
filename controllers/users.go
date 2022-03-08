@@ -21,6 +21,35 @@ const minPasswordLength = 8
 // 	Message string `json:"message"`
 // }
 
+// @Title Get user list
+// @Description Get user list
+// @Param   pageNumber    query   int false  0  "Fetch result page number"
+// @Param   pageSize    query   int false  20  "Max number of items returned"
+// @Success 200 {object} controllers.UserListResponseSchema
+// @router / [get]
+func (c *UsersController) Get() {
+	var response UserListResponseSchema
+	var pageNumber = c.Ctx.Input.Param(":pageNumber")
+	fmt.Println("pageNumber:", pageNumber)
+
+	o := orm.NewOrm()
+	cnt, _ := o.
+		QueryTable(new(models.User)).
+		OrderBy("DateJoined").
+		Filter("Deleted", false).
+		RelatedSel().
+		All(&response.Items)
+
+	response.Meta.ItemsCount = int(cnt)
+
+	c.Data["json"] = response
+	c.ServeJSON()
+}
+
+// type UserResponse struct {
+// 	Message string `json:"message"`
+// }
+
 // @Title Create User
 // @Description Create new user
 // @Param	body		body 	models.UserCreateRequest	true		"body for user content"
