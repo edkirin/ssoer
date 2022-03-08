@@ -24,7 +24,6 @@ const minPasswordLength = 8
 // @Success 200 {object} controllers.UserListResponseSchema
 // @router / [get]
 func (c *UsersController) Get() {
-	var response UserListResponseSchema
 	pageNumber, err := c.GetUint32("pageNumber")
 	if err != nil {
 		pageNumber = 1
@@ -34,7 +33,9 @@ func (c *UsersController) Get() {
 		pageSize = 10
 	}
 
+	var response UserListResponseSchema
 	o := orm.NewOrm()
+
 	itemsCount, _ := o.
 		QueryTable(new(models.User)).
 		OrderBy("FirstName").
@@ -50,7 +51,7 @@ func (c *UsersController) Get() {
 
 	response.Meta.ItemsCount = uint(itemsCount)
 	response.Meta.PageNumber = uint(pageNumber)
-	response.Meta.PageCount = uint(uint(totalCount)/uint(pageSize+1) + 1)
+	response.Meta.PageCount = uint(totalCount)/uint(pageSize+1) + 1
 
 	c.Data["json"] = response
 	c.ServeJSON()
