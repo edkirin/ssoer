@@ -17,30 +17,40 @@ type UsersController struct {
 
 const minPasswordLength = 8
 
-// type UserResponse struct {
-// 	Message string `json:"message"`
-// }
-
 // @Title Get user list
 // @Description Get user list
-// @Param   pageNumber    query   int false  0  "Fetch result page number"
-// @Param   pageSize    query   int false  20  "Max number of items returned"
+// @Param   pageNumber		query	int	false	"Fetch result page number"
+// @Param   pageSize    	query	int	false	"Max number of items returned"
 // @Success 200 {object} controllers.UserListResponseSchema
 // @router / [get]
 func (c *UsersController) Get() {
 	var response UserListResponseSchema
-	var pageNumber = c.Ctx.Input.Param(":pageNumber")
-	fmt.Println("pageNumber:", pageNumber)
+	pageNumber, err := c.GetUint32("pageNumber")
+	if err != nil {
+		pageNumber = 1
+	}
+	pageSize, err := c.GetUint32("pageSize")
+	if err != nil {
+		pageSize = 10
+	}
 
 	o := orm.NewOrm()
-	cnt, _ := o.
+	itemsCount, _ := o.
 		QueryTable(new(models.User)).
-		OrderBy("DateJoined").
+		OrderBy("FirstName").
 		Filter("Deleted", false).
-		RelatedSel().
+		Offset((pageNumber - 1) * pageSize).
+		Limit(pageSize).
 		All(&response.Items)
 
-	response.Meta.ItemsCount = int(cnt)
+	totalCount, _ := o.
+		QueryTable(new(models.User)).
+		Filter("Deleted", false).
+		Count()
+
+	response.Meta.ItemsCount = uint(itemsCount)
+	response.Meta.PageNumber = uint(pageNumber)
+	response.Meta.PageCount = uint(uint(totalCount)/uint(pageSize+1) + 1)
 
 	c.Data["json"] = response
 	c.ServeJSON()

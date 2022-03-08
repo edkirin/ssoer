@@ -3,9 +3,9 @@ package controllers
 import "ssoer/models"
 
 type MetaSchema struct {
-	ItemsCount int `json:"count"`
-	PageCount  int `json:"pageCount"`
-	PageNumber int `json:"pageNumber"`
+	ItemsCount uint `json:"count"`
+	PageCount  uint `json:"pageCount"`
+	PageNumber uint `json:"pageNumber"`
 }
 
 type UserListResponseSchema struct {

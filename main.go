@@ -20,20 +20,8 @@ func init() {
 	var dbConnectionString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		DbUser, DbPassword, DbHost, DbPort, DbName,
 	)
-
 	orm.RegisterDriver("postgres", orm.DRPostgres)
 	orm.RegisterDataBase("default", "postgres", dbConnectionString)
-
-	// orm.RegisterDataBase("default", "postgres",
-	// 	fmt.Sprintf("user=%s "+
-	// 		"password=%s "+
-	// 		"host=%s "+
-	// 		"port=%s "+
-	// 		"dbname=%s "+
-	// 		"sslmode=disable",
-	// 		DbUser, DbPassword, DbHost, DbPort, DbName,
-	// 	),
-	// )
 	orm.Debug = true
 }
 
